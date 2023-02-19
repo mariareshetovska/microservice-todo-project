@@ -9,6 +9,7 @@ RUN addgroup -S gouser && adduser -S -G gouser gouser
 USER gouser:gouser
 COPY --from=build /app app
 COPY ./migration ./migration
+COPY config.yaml .
 
 EXPOSE 8080
 CMD ["./app" ]

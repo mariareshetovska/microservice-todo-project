@@ -1,30 +1,24 @@
 package main
 
 import (
+	"log"
+	"mainApi/config"
 	"mainApi/pkg/database"
 	"mainApi/pkg/router"
 	"net/http"
 
-	"os"
-
-	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		logrus.WithError(err).Fatal("error loading env variables")
+	config, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	urlPostgres := database.GetUrl(database.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		DBname:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-		Password: os.Getenv("DB_PASSWORD"),
-	})
+	urlPostgres := database.GetUrl(config.Db)
+
 	db, err := database.New(urlPostgres)
 	if err != nil {
 		logrus.WithError(err).Fatal("Error verifing database")
@@ -34,8 +28,8 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("Error building router")
 	}
-	const port = "8080"
-	if err := http.ListenAndServe(":8080", router); err != nil && err != http.ErrServerClosed {
+
+	if err := http.ListenAndServe(":"+config.Server.Port, router); err != nil && err != http.ErrServerClosed {
 		logrus.WithError(err).Error("Server failed")
 	}
 

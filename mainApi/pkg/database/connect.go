@@ -2,8 +2,10 @@ package database
 
 import (
 	"fmt"
+	"mainApi/config"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,16 +36,7 @@ func New(dbURL string) (Database, error) {
 	return d, nil
 }
 
-type Config struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBname   string
-	SSLMode  string
-}
-
-func GetUrl(cfg Config) string {
+func GetUrl(cfg config.DbConfig) string {
 	url := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.Username, cfg.DBname, cfg.Password, cfg.SSLMode)
 	return url
